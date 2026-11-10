@@ -1,9 +1,17 @@
-from nicegui import ui
+"""Workout Generator - Startpunkt der Anwendung.
 
-ui.colors(primary='#0F172A', secondary='#3B82F6', accent='#10B981')
-ui.label('Hello NiceGUI!').classes('text-2xl text-secondary font-bold1')
-ui.label('Hello Niklas!').classes('text-3xl text-secondary font-bold1')
-ui.button('Test Button', on_click=lambda: ui.notify('Hello, Pollo frito'))
+Starten:  python main.py
+Danach im Browser / auf den iPads:  http://<IP-dieses-Rechners>:8080
+"""
+from nicegui import app, ui
 
-ui.run()
-                
+import database as db
+from config import PORT, STORAGE_SECRET, VIDEO_ORDNER
+from pages import master, start, station  # noqa: F401  (registriert die Seiten)
+
+db.init_db()
+app.add_media_files('/videos', VIDEO_ORDNER)   # Videos streamen (wichtig für Safari/iPad)
+
+if __name__ in {'__main__', '__mp_main__'}:
+    ui.run(title='Workout Generator', host='0.0.0.0', port=PORT,
+           storage_secret=STORAGE_SECRET, favicon='💪', language='de')
