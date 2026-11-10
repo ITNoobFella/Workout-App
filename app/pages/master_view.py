@@ -7,8 +7,6 @@ import uuid
 
 from nicegui import app, ui
 
-import database as db
-import sync
 from config import BLAU, GRUEN, SCHWIERIGKEIT_FARBE, SCHWIERIGKEITEN, VIDEO_ORDNER
 from pages import theme
 
