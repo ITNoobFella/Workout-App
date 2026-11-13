@@ -4,6 +4,9 @@ Starten:  python main.py
 Danach im Browser / auf den iPads:  http://<IP-dieses-Rechners>:8080
 """
 from nicegui import app, ui
+from config import VIDEO_ORDNER
+
+app.add_media_files('/videos', VIDEO_ORDNER)
 
 #import database as db
 from config import PORT, STORAGE_SECRET
