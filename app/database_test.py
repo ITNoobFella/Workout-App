@@ -13,11 +13,10 @@ UEBUNGEN = [
      'schwierigkeit': 'mittel', 'wiederholungen': 1},
     {'id': 3, 'name': 'Burpees', 'beschreibung': 'Kniebeuge, Liegestütz, Sprung nach oben.',
      'schwierigkeit': 'schwer', 'wiederholungen': 10},
+    {'id': 4, 'name': 'Kniebeugen', 'beschreibung': 'Kniebeuge, Liegestütz, Sprung nach oben.',
+    'schwierigkeit': 'schwer', 'wiederholungen': 10, 'video': 'Knieboegen.mp4'},
 ]
 
-
-def alle_stationen():
-    return STATIONEN
 
 
 def station_nach_nummer(nummer):
@@ -25,4 +24,20 @@ def station_nach_nummer(nummer):
 
 
 def zufaellige_uebung(station_id):
-    return random.choice(UEBUNGEN)
+    return random.choice(UEBUNGEN) if UEBUNGEN else None
+
+def alle_uebungen():
+    return sorted(UEBUNGEN, key=lambda u: u['name'])
+
+
+def uebung_speichern(daten, uebung_id=None):
+    if uebung_id is None:                                   # neu anlegen
+        neue_id = max((u['id'] for u in UEBUNGEN), default=0) + 1
+        UEBUNGEN.append({'id': neue_id, **daten})
+    else:                                                   # bestehende ändern
+        for u in UEBUNGEN:
+            if u['id'] == uebung_id:
+                u.update(daten)
+
+def uebung_loeschen(uebung_id):
+    UEBUNGEN[:] = [u for u in UEBUNGEN if u['id'] != uebung_id]
