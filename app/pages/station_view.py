@@ -36,7 +36,11 @@ def station_seite(nummer: int):
 
     # ---------------------------------------------------------- Würfeln
     def wuerfeln():
-        zustand['uebung'] = db.zufaellige_uebung(station['id'])
+        uebung = db.zufaellige_uebung(station['id'])
+        if uebung is None:
+            ui.notify('Dieser Station sind keine Übungen zugeordnet', type='warning')
+            return
+        zustand['uebung'] = uebung
         zuruecksetzen()
         inhalt.refresh()
 

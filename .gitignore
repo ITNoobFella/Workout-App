@@ -4,3 +4,4 @@ venv/
 .venv/
 daten/
 .env
+.nicegui/

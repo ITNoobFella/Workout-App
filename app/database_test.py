@@ -2,8 +2,10 @@
 import random
 
 STATIONEN = [
-    {'id': 1, 'nummer': 1, 'name': 'Oberkörper', 'dauer_sekunden':60},
-    {'id': 2, 'nummer': 2, 'name': 'Beine', 'dauer_sekunden': 60},
+    {'id': 1, 'nummer': 1, 'name': 'Oberkörper', 'dauer_sekunden': 60,
+     'modus': 'zufall', 'uebung_ids': [1, 2, 3]},
+    {'id': 2, 'nummer': 2, 'name': 'Beine', 'dauer_sekunden': 60,
+     'modus': 'zufall', 'uebung_ids': [3, 4]},
 ]
 
 UEBUNGEN = [
@@ -13,18 +15,61 @@ UEBUNGEN = [
      'schwierigkeit': 'mittel', 'wiederholungen': 1},
     {'id': 3, 'name': 'Burpees', 'beschreibung': 'Kniebeuge, Liegestütz, Sprung nach oben.',
      'schwierigkeit': 'schwer', 'wiederholungen': 10},
-    {'id': 4, 'name': 'Kniebeugen', 'beschreibung': 'Kniebeuge, Liegestütz, Sprung nach oben.',
-    'schwierigkeit': 'schwer', 'wiederholungen': 10, 'video': 'Knieboegen.mp4'},
+    {'id': 4, 'name': 'Kniebeugen', 'beschreibung': 'Rücken gerade, Knie nicht über die Zehen.',
+     'schwierigkeit': 'schwer', 'wiederholungen': 10, 'video': 'Knieboegen.mp4'},
 ]
 
+
+# ------------------------------------------------------------------ Stationen
+def alle_stationen():
+    return STATIONEN
 
 
 def station_nach_nummer(nummer):
     return next((s for s in STATIONEN if s['nummer'] == nummer), None)
 
 
+def _station_nach_id(station_id):
+    return next((s for s in STATIONEN if s['id'] == station_id), None)
+
+
+def station_uebungen(station_id):
+    s = _station_nach_id(station_id)
+    if not s:
+        return []
+    return [u for u in UEBUNGEN if u['id'] in s['uebung_ids']]
+
+
+def station_speichern(daten, station_id=None):
+    if station_id is None:
+        neue_id = max((s['id'] for s in STATIONEN), default=0) + 1
+        STATIONEN.append({'id': neue_id, 'modus': 'zufall', 'uebung_ids': [], **daten})
+        return neue_id
+    _station_nach_id(station_id).update(daten)
+    return station_id
+
+
+def station_loeschen(station_id):
+    STATIONEN[:] = [s for s in STATIONEN if s['id'] != station_id]
+
+
+def station_uebungen_setzen(station_id, uebung_ids):
+    s = _station_nach_id(station_id)
+    if s:
+        s['uebung_ids'] = list(uebung_ids)
+
+
+def modus_setzen(station_id, modus):
+    s = _station_nach_id(station_id)
+    if s:
+        s['modus'] = modus
+
+
+# ------------------------------------------------------------------ Übungen
 def zufaellige_uebung(station_id):
-    return random.choice(UEBUNGEN) if UEBUNGEN else None
+    auswahl = station_uebungen(station_id)           # nur Übungen dieser Station
+    return random.choice(auswahl) if auswahl else None
+
 
 def alle_uebungen():
     return sorted(UEBUNGEN, key=lambda u: u['name'])
@@ -39,5 +84,8 @@ def uebung_speichern(daten, uebung_id=None):
             if u['id'] == uebung_id:
                 u.update(daten)
 
+
 def uebung_loeschen(uebung_id):
     UEBUNGEN[:] = [u for u in UEBUNGEN if u['id'] != uebung_id]
+    for s in STATIONEN:                                     # auch aus den Stationen entfernen
+        s['uebung_ids'] = [i for i in s['uebung_ids'] if i != uebung_id]
