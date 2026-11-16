@@ -2,7 +2,7 @@
 from nicegui import ui
 
 import database_test as db          # später: import database as db
-from config import BLAU, DUNKELBLAU, GRUEN, ORANGE, VIDEO_ORDNER
+from config import BLAU, GRUEN, ORANGE, VIDEO_ORDNER
 from pages import theme
 
 
@@ -20,21 +20,34 @@ def station_seite(nummer: int):
             timer['rest'] -= 1
             if timer['rest'] == 0:
                 timer['laeuft'] = False
+                timer_steuerung.refresh()         # Symbol zurück auf Play
                 ui.notify('Zeit abgelaufen!', type='warning')
 
     def start_pause():
         timer['laeuft'] = not timer['laeuft']
+        timer_steuerung.refresh()                 # Symbol wechselt Play <-> Pause
 
     def zuruecksetzen():
         timer['laeuft'] = False
         timer['rest'] = dauer
+
+    def zuruecksetzen_klick():
+        zuruecksetzen()
+        timer_steuerung.refresh()
 
     ui.timer(1.0, tick)
 
     def uhrzeit(sekunden):
         return f'{sekunden // 60:02d}:{sekunden % 60:02d}'
 
-    # ---------------------------------------------------------- Würfeln
+    @ui.refreshable
+    def timer_steuerung():
+        with ui.row().classes('gap-3 mt-4'):
+            ui.button(icon='pause' if timer['laeuft'] else 'play_arrow', on_click=start_pause) \
+                .props('round size=xl')
+            ui.button(icon='restart_alt', on_click=zuruecksetzen_klick).props('round outline size=xl')
+
+    # ---------------------------------------------------------- Übung wählen
     def wuerfeln():
         uebung = db.zufaellige_uebung(station['id'])
         if uebung is None:
@@ -43,6 +56,27 @@ def station_seite(nummer: int):
         zustand['uebung'] = uebung
         zuruecksetzen()
         inhalt.refresh()
+
+    def auswaehlen(uebung):                       # Fest-Modus: Schüler wählt aus der Liste
+        zustand['uebung'] = uebung
+        zuruecksetzen()
+        inhalt.refresh()
+
+    # ---------------------------------------------------------- Änderungen der Lehrkraft erkennen
+    def konfiguration():
+        s = db.station_nach_nummer(nummer)
+        if s is None:
+            return None
+        return (s['name'], s['modus'], s['dauer_sekunden'],
+                tuple(u['id'] for u in db.station_uebungen(s['id'])))
+
+    stand = {'wert': konfiguration()}
+
+    def pruefen():
+        if konfiguration() != stand['wert']:
+            ui.navigate.to(f'/station/{nummer}')  # Seite neu laden
+
+    ui.timer(2.0, pruefen)
 
     # ---------------------------------------------------------- Anzeige
     @ui.refreshable
@@ -79,9 +113,7 @@ def station_seite(nummer: int):
                         .style(f'flex: 1; background:#1E293B; border: 2px solid {BLAU}'):
                     ui.label().classes('font-bold').style('font-size: 96px; line-height: 1') \
                         .bind_text_from(timer, 'rest', backward=uhrzeit)
-                    with ui.row().classes('gap-3 mt-4'):
-                        ui.button(icon='play_arrow', on_click=start_pause).props('round size=xl')
-                        ui.button(icon='restart_alt', on_click=zuruecksetzen).props('round outline size=xl')
+                    timer_steuerung()
 
                 # untere Hälfte: Wiederholungen
                 with ui.card().classes('karte w-full items-center justify-center') \
@@ -93,9 +125,14 @@ def station_seite(nummer: int):
                             .style(f'font-size: 120px; line-height: 1; color:{ORANGE}')
                     ui.label('Wiederholungen').classes('text-2xl text-gray-300')
 
-        # Unten: Würfel-Button
-        with ui.row().classes('w-full justify-center pt-4'):
-            ui.button('Würfeln', icon='casino', color='warning', on_click=wuerfeln) \
-                .classes('text-3xl px-16 py-4')
+        # Unten: Zufallsmodus = Würfel-Button, Fest-Modus = Liste der Übungen
+        with ui.row().classes('w-full justify-center gap-3 pt-4 flex-wrap'):
+            if station['modus'] == 'zufall':
+                ui.button('Würfeln', icon='casino', color='warning', on_click=wuerfeln) \
+                    .classes('text-3xl px-16 py-4')
+            else:
+                for u in db.station_uebungen(station['id']):
+                    ui.button(u['name'], on_click=lambda u=u: auswaehlen(u)) \
+                        .props('outline size=lg')
 
     inhalt()
