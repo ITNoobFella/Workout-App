@@ -2,6 +2,7 @@
 from nicegui import ui
 
 import database_test as db          # später: import database as db
+import sync
 from config import BLAU, SCHWIERIGKEIT_FARBE, SCHWIERIGKEITEN
 from pages import theme
 
@@ -9,8 +10,12 @@ from pages import theme
 @ui.page('/master')
 def master_seite():
     theme.anwenden()
+    zustand = {'version': sync.version()}
 
     def geaendert():
+        """Nach jeder Änderung: Stationen informieren und eigene Ansicht neu zeichnen."""
+        sync.aenderung_melden()
+        zustand['version'] = sync.version()
         stationen_liste.refresh()
         uebungen_liste.refresh()
 
@@ -42,20 +47,29 @@ def master_seite():
 
     def station_karte(s):
         anzahl = len(db.station_uebungen(s['id']))
+        aktuell = db.uebung_holen(s['aktuelle_uebung_id']) if s.get('aktuelle_uebung_id') else None
         with ui.card().classes('karte p-5 gap-3'):
             with ui.row().classes('items-center gap-3 no-wrap'):
                 ui.label(str(s['nummer'])).classes('text-2xl font-bold text-white rounded-xl px-3 py-1') \
                     .style(f'background:{BLAU}')
                 ui.label(s['name'] or 'Ohne Namen').classes('text-xl font-bold')
+
+            with ui.row().classes('items-center gap-2'):
+                ui.icon('play_circle', color='positive')
+                ui.label(aktuell['name'] if aktuell else '- keine Übung -').classes('text-lg')
+
             ui.label(f'{anzahl} Übungen  ·  Timer {s["dauer_sekunden"]} s').classes('text-gray-500')
             ui.switch('Zufallsmodus', value=s['modus'] == 'zufall',
-                      on_change=lambda e, sid=s['id']: db.modus_setzen(sid, 'zufall' if e.value else 'fest')) \
-                .props('color=warning')
+                      on_change=lambda e, sid=s['id']: modus_aendern(sid, e.value)).props('color=warning')
             with ui.row().classes('w-full gap-2'):
                 ui.button('Bearbeiten', icon='edit', on_click=lambda st=s: station_dialog(st)).props('outline')
                 ui.button(icon='open_in_new',
                           on_click=lambda nr=s['nummer']: ui.navigate.to(f'/station/{nr}', new_tab=True)) \
                     .props('outline color=grey-8').tooltip('Stationsansicht öffnen')
+
+    def modus_aendern(station_id, zufall):
+        db.modus_setzen(station_id, 'zufall' if zufall else 'fest')
+        geaendert()
 
     def alle_modus(modus):
         for s in db.alle_stationen():
@@ -80,6 +94,8 @@ def master_seite():
                               min=5, step=5, format='%d').props('outlined')
             uebungen = ui.select(alle, multiple=True, value=zugeordnet, label='Übungen an dieser Station') \
                 .props('outlined use-chips').classes('w-full')
+            aktuell = ui.select(alle, value=s.get('aktuelle_uebung_id') if s else None, clearable=True,
+                                label='Feste Übung (im Fest-Modus)').props('outlined').classes('w-full')
 
             def speichern():
                 andere = [x for x in db.alle_stationen() if not s or x['id'] != s['id']]
@@ -89,6 +105,7 @@ def master_seite():
                 station_id = db.station_speichern({
                     'nummer': int(nummer.value), 'name': name.value or '',
                     'dauer_sekunden': int(dauer.value or 60),
+                    'aktuelle_uebung_id': aktuell.value,
                 }, s['id'] if s else None)
                 db.station_uebungen_setzen(station_id, uebungen.value or [])
                 d.close()
@@ -183,3 +200,11 @@ def master_seite():
             with ui.column().classes('w-full max-w-3xl mx-auto gap-4'):
                 ui.button('Neue Übung', icon='add', on_click=lambda: uebung_dialog(None))
                 uebungen_liste()
+
+    # Änderungen der Stationen (z. B. Schüler würfelt) übernehmen
+    def pruefen():
+        if sync.version() != zustand['version']:
+            zustand['version'] = sync.version()
+            stationen_liste.refresh()
+
+    ui.timer(1.0, pruefen)
