@@ -3,9 +3,9 @@ import random
 
 STATIONEN = [
     {'id': 1, 'nummer': 1, 'name': 'Oberkörper', 'dauer_sekunden': 60,
-     'modus': 'zufall', 'uebung_ids': [1, 2, 3]},
+     'modus': 'zufall', 'uebung_ids': [1, 2, 3], 'aktuelle_uebung_id': 1},
     {'id': 2, 'nummer': 2, 'name': 'Beine', 'dauer_sekunden': 60,
-     'modus': 'zufall', 'uebung_ids': [3, 4]},
+     'modus': 'zufall', 'uebung_ids': [3, 4], 'aktuelle_uebung_id': 4},
 ]
 
 UEBUNGEN = [
@@ -43,7 +43,8 @@ def station_uebungen(station_id):
 def station_speichern(daten, station_id=None):
     if station_id is None:
         neue_id = max((s['id'] for s in STATIONEN), default=0) + 1
-        STATIONEN.append({'id': neue_id, 'modus': 'zufall', 'uebung_ids': [], **daten})
+        STATIONEN.append({'id': neue_id, 'modus': 'zufall', 'uebung_ids': [],
+                          'aktuelle_uebung_id': None, **daten})
         return neue_id
     _station_nach_id(station_id).update(daten)
     return station_id
@@ -65,10 +66,28 @@ def modus_setzen(station_id, modus):
         s['modus'] = modus
 
 
+def aktuelle_uebung_setzen(station_id, uebung_id):
+    s = _station_nach_id(station_id)
+    if s:
+        s['aktuelle_uebung_id'] = uebung_id
+
+
 # ------------------------------------------------------------------ Übungen
+def uebung_holen(uebung_id):
+    return next((u for u in UEBUNGEN if u['id'] == uebung_id), None)
+
+
 def zufaellige_uebung(station_id):
-    auswahl = station_uebungen(station_id)           # nur Übungen dieser Station
-    return random.choice(auswahl) if auswahl else None
+    """Zufällige Übung der Station, möglichst nicht dieselbe wie vorher."""
+    s = _station_nach_id(station_id)
+    kandidaten = station_uebungen(station_id)
+    if not kandidaten:
+        return None
+    if len(kandidaten) > 1:
+        kandidaten = [u for u in kandidaten if u['id'] != s.get('aktuelle_uebung_id')]
+    gewaehlt = random.choice(kandidaten)
+    aktuelle_uebung_setzen(station_id, gewaehlt['id'])
+    return gewaehlt
 
 
 def alle_uebungen():
@@ -89,3 +108,5 @@ def uebung_loeschen(uebung_id):
     UEBUNGEN[:] = [u for u in UEBUNGEN if u['id'] != uebung_id]
     for s in STATIONEN:                                     # auch aus den Stationen entfernen
         s['uebung_ids'] = [i for i in s['uebung_ids'] if i != uebung_id]
+        if s.get('aktuelle_uebung_id') == uebung_id:
+            s['aktuelle_uebung_id'] = None
