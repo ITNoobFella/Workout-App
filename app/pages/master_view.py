@@ -3,7 +3,7 @@ from nicegui import ui
 
 import database_test as db          # später: import database as db
 import sync
-from config import BLAU, SCHWIERIGKEIT_FARBE, SCHWIERIGKEITEN
+from config import BLAU
 from pages import theme
 
 
@@ -129,6 +129,7 @@ def master_seite():
 
     # ============================================================ ÜBUNGEN
     @ui.refreshable
+
     def uebungen_liste():
         uebungen = db.alle_uebungen()
         if not uebungen:
@@ -138,24 +139,18 @@ def master_seite():
                 with ui.row().classes('w-full items-center justify-between no-wrap'):
                     with ui.column().classes('gap-0'):
                         ui.label(u['name']).classes('text-xl font-bold')
-                        ui.label(f'{u["wiederholungen"]} Wiederholungen  -  {u["beschreibung"]}') \
-                            .classes('text-gray-500')
+                        ui.label(f'{u["wiederholungen"]} Wiederholungen').classes('text-gray-500')
                     with ui.row().classes('items-center gap-2 no-wrap'):
-                        ui.label(u['schwierigkeit']).classes('text-white font-bold rounded-xl px-3 py-1') \
-                            .style(f'background:{SCHWIERIGKEIT_FARBE[u["schwierigkeit"]]}')
                         ui.button(icon='edit', on_click=lambda u=u: uebung_dialog(u)).props('flat round')
                         ui.button(icon='delete', color='negative',
                                   on_click=lambda u=u: loeschen_dialog(u)).props('flat round')
+
+
 
     def uebung_dialog(u=None):
         with ui.dialog() as d, ui.card().classes('karte w-96'):
             ui.label('Übung bearbeiten' if u else 'Neue Übung').classes('text-xl font-bold')
             name = ui.input('Name', value=u['name'] if u else '').props('outlined').classes('w-full')
-            beschreibung = ui.textarea('Beschreibung', value=u['beschreibung'] if u else '') \
-                .props('outlined').classes('w-full')
-            schwierigkeit = ui.select(SCHWIERIGKEITEN, label='Schwierigkeit',
-                                      value=u['schwierigkeit'] if u else 'mittel') \
-                .props('outlined').classes('w-full')
             wdh = ui.number('Wiederholungen', value=u['wiederholungen'] if u else 10,
                             min=1, step=1, format='%d').props('outlined').classes('w-full')
 
@@ -165,8 +160,6 @@ def master_seite():
                     return
                 db.uebung_speichern({
                     'name': name.value.strip(),
-                    'beschreibung': beschreibung.value or '',
-                    'schwierigkeit': schwierigkeit.value,
                     'wiederholungen': int(wdh.value or 1),
                 }, u['id'] if u else None)
                 d.close()

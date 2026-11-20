@@ -9,12 +9,12 @@ STATIONEN = [
 ]
 
 UEBUNGEN = [
-    {'id': 1, 'name': 'Liegestütze','wiederholungen': 12, 'video': 'liegestuetze.mp4'},
-    {'id': 2, 'name': 'Plank','wiederholungen': 1, 'video': 'plank.mp4'},
-    {'id': 3, 'name': 'Burpees', 'wiederholungen': 10, 'video': 'Burpees.mp4'},
-    {'id': 4, 'name': 'Kniebeugen', 'wiederholungen': 10, 'video': 'Knieboegen.mp4'},
-    {'id': 5, 'name': 'Hampelmann', 'wiederholungen': 10, 'video': 'jumping_jacks.mp4'},
-    {'id': 6, 'name': 'Crunches', 'wiederholungen': 15, 'video': 'crunch.mp4'},
+    {'id': 1, 'name': 'Liegestütze','wiederholungen': 12 , 'beschreibung': ' ', 'video': 'liegestuetze.mp4'},  # BESCHREIBUNG JETZT WUR KÖNNEN LÖSCHEN 
+    {'id': 2, 'name': 'Plank','wiederholungen': 1 , 'beschreibung': ' ', 'video': 'plank.mp4'},
+    {'id': 3, 'name': 'Burpees', 'wiederholungen': 10 , 'beschreibung': ' ', 'video': 'Burpees.mp4'},
+    {'id': 4, 'name': 'Kniebeugen', 'wiederholungen': 10 , 'beschreibung': ' ', 'video': 'Knieboegen.mp4'},
+    {'id': 5, 'name': 'Hampelmann', 'wiederholungen': 10 , 'beschreibung': ' ', 'video': 'jumping_jacks.mp4'},
+    {'id': 6, 'name': 'Crunches', 'wiederholungen': 15, 'beschreibung': ' ' ,  'video': 'crunch.mp4'},
 ]
 
 
