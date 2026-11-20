@@ -9,14 +9,12 @@ STATIONEN = [
 ]
 
 UEBUNGEN = [
-    {'id': 1, 'name': 'Liegestütze', 'beschreibung': 'Rücken gerade halten, Brust bis kurz vor den Boden.',
-     'schwierigkeit': 'mittel', 'wiederholungen': 12, 'video': 'liegestuetze.mp4'},
-    {'id': 2, 'name': 'Plank', 'beschreibung': 'Körper bildet eine gerade Linie, Bauch anspannen.',
-     'schwierigkeit': 'mittel', 'wiederholungen': 1},
-    {'id': 3, 'name': 'Burpees', 'beschreibung': 'Kniebeuge, Liegestütz, Sprung nach oben.',
-     'schwierigkeit': 'schwer', 'wiederholungen': 10},
-    {'id': 4, 'name': 'Kniebeugen', 'beschreibung': 'Rücken gerade, Knie nicht über die Zehen.',
-     'schwierigkeit': 'schwer', 'wiederholungen': 10, 'video': 'Knieboegen.mp4'},
+    {'id': 1, 'name': 'Liegestütze','wiederholungen': 12, 'video': 'liegestuetze.mp4'},
+    {'id': 2, 'name': 'Plank','wiederholungen': 1, 'video': 'plank.mp4'},
+    {'id': 3, 'name': 'Burpees', 'wiederholungen': 10, 'video': 'Burpees.mp4'},
+    {'id': 4, 'name': 'Kniebeugen', 'wiederholungen': 10, 'video': 'Knieboegen.mp4'},
+    {'id': 5, 'name': 'Hampelmann', 'wiederholungen': 10, 'video': 'jumping_jacks.mp4'},
+    {'id': 6, 'name': 'Crunches', 'wiederholungen': 15, 'video': 'crunch.mp4'},
 ]
 
 

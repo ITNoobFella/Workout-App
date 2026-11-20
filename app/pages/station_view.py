@@ -48,8 +48,8 @@ def station_seite(nummer: int):
     def timer_steuerung():
         with ui.row().classes('gap-3 mt-4'):
             ui.button(icon='pause' if timer['laeuft'] else 'play_arrow', on_click=start_pause) \
-                .props('round size=xl')
-            ui.button(icon='restart_alt', on_click=zuruecksetzen_klick).props('round outline size=xl')
+                .props('round size=40px')
+            ui.button(icon='restart_alt', on_click=zuruecksetzen_klick).props('round outline size=40px')
 
     # ============================================================ 2. Übung wählen
     async def wuerfeln():

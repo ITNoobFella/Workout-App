@@ -27,7 +27,7 @@ def startseite():
     with ui.column().classes('w-full items-center gap-8 p-10'):
         ui.icon('fitness_center', size='72px', color='warning')
         ui.label('Workout Generator').classes('text-5xl font-bold')
-        ui.label('Zirkeltraining - Industrieschule Chemnitz').classes('text-xl text-gray-400')
+        ui.label('Industrieschule Chemnitz').classes('text-xl text-gray-400')
 
         with ui.row().classes('gap-8 mt-6 justify-center'):
             # Karte 1: Lehrkraft (Master)
